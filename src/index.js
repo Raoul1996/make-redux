@@ -9,6 +9,20 @@ const appState = {
   }
 }
 
+
+function dispatch(action) {
+  switch (action.type) {
+    case 'UPDATE_TITLE_TEXT':
+      appState.title.text = action.text
+      break
+    case 'UPDATE_TITLE_COLOR':
+      appState.title.color = action.color
+      break
+    default:
+      break
+  }
+}
+
 function renderApp(appState) {
   renderTitle(appState.title)
   renderContent(appState.content)
@@ -26,4 +40,9 @@ function renderContent(content) {
   contentDOM.style.color = content.color
 
 }
+
+renderApp(appState)
+
+dispatch({type: 'UPDATE_TITLE_TEXT', text: 'Raoul\'s lover already leave'})
+dispatch({type: 'UPDATE_TITLE_COLOR', color: 'gray'})
 renderApp(appState)

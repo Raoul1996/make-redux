@@ -1,13 +1,15 @@
-function createStore(state, stateChanger) {
+function createStore(reducer) {
+  let state = null
   const listeners = []
   const subscribe = (listener) => listeners.push(listener)
   const getState = () => state
   const dispatch = (action) => {
-    // 由于stateChanger返回的是一个新的对象，所以要将state替换
-    state = stateChanger(state, action)
-    stateChanger(state, action)
+    // 由于reducer返回的是一个新的对象，所以要将state替换
+    state = reducer(state, action)
+    reducer(state, action)
     listeners.forEach((listener) => listener())
   }
+  dispatch({})
   return {getState, dispatch, subscribe}
 }
 
@@ -32,19 +34,20 @@ function renderContent(newContent, oldContent = {}) {
 
 }
 
-const appState = {
-  title: {
-    text: 'React little book',
-    color: 'red'
-  },
-  content: {
-    text: 'the content of react little book',
-    color: 'blue'
-  }
-}
-
 // 每次都要返回一个新的对象
-function stateChanger(state, action) {
+function reducer(state, action) {
+  if (!state) {
+    return {
+      title: {
+        text: 'React little book',
+        color: 'red'
+      },
+      content: {
+        text: 'the content of react little book',
+        color: 'blue'
+      }
+    }
+  }
   switch (action.type) {
     case 'UPDATE_TITLE_TEXT':
       return {
@@ -60,7 +63,7 @@ function stateChanger(state, action) {
 }
 
 
-const store = createStore(appState, stateChanger)
+const store = createStore(reducer)
 let oldState = store.getState()
 store.subscribe(() => {
   const newState = store.getState()

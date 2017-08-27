@@ -10,9 +10,14 @@ const appState = {
 }
 
 function createStore(state, stateChanger) {
+  const listeners = []
+  const subscribe = (listener) => listeners.push(listener)
   const getState = () => state
-  const dispatch = (action) => stateChanger(state, action)
-  return {getState, dispatch}
+  const dispatch = (action) => {
+    stateChanger(state, action)
+    listeners.forEach((listener) => listener())
+  }
+  return {getState, dispatch, subscribe}
 }
 
 function stateChanger(state, action) {
@@ -27,8 +32,6 @@ function stateChanger(state, action) {
       break
   }
 }
-
-const store = createStore(appState, stateChanger)
 
 function renderApp(appState) {
   renderTitle(appState.title)
@@ -48,8 +51,10 @@ function renderContent(content) {
 
 }
 
+const store = createStore(appState, stateChanger)
+store.subscribe(() => renderApp(store.getState()))
+
 renderApp(store.getState())
 
 store.dispatch({type: 'UPDATE_TITLE_TEXT', text: 'Raoul\'s lover already leave'})
 store.dispatch({type: 'UPDATE_TITLE_COLOR', color: 'gray'})
-renderApp(store.getState())

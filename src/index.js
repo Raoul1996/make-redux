@@ -3,6 +3,8 @@ function createStore(state, stateChanger) {
   const subscribe = (listener) => listeners.push(listener)
   const getState = () => state
   const dispatch = (action) => {
+    // 由于stateChanger返回的是一个新的对象，所以要将state替换
+    state = stateChanger(state, action)
     stateChanger(state, action)
     listeners.forEach((listener) => listener())
   }
@@ -11,8 +13,8 @@ function createStore(state, stateChanger) {
 
 function renderApp(newAppState, oldAppState = {}) {
   if (newAppState === oldAppState) return
-  renderTitle(newAppState.title)
-  renderContent(newAppState.content)
+  renderTitle(newAppState.title, oldAppState.title)
+  renderContent(newAppState.content, oldAppState.content)
 }
 
 function renderTitle(newTitle, oldTitle = {}) {
@@ -41,17 +43,19 @@ const appState = {
   }
 }
 
-
+// 每次都要返回一个新的对象
 function stateChanger(state, action) {
   switch (action.type) {
     case 'UPDATE_TITLE_TEXT':
-      state.title.text = action.text
-      break
+      return {
+        ...state, title: {...state.title, text: action.text}
+      }
     case 'UPDATE_TITLE_COLOR':
-      state.title.color = action.color
-      break
+      return {
+        ...state, title: {...state.title, color: action.color}
+      }
     default:
-      break
+      return state
   }
 }
 

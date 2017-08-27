@@ -1,3 +1,35 @@
+function createStore(state, stateChanger) {
+  const listeners = []
+  const subscribe = (listener) => listeners.push(listener)
+  const getState = () => state
+  const dispatch = (action) => {
+    stateChanger(state, action)
+    listeners.forEach((listener) => listener())
+  }
+  return {getState, dispatch, subscribe}
+}
+
+function renderApp(newAppState, oldAppState = {}) {
+  if (newAppState === oldAppState) return
+  renderTitle(newAppState.title)
+  renderContent(newAppState.content)
+}
+
+function renderTitle(newTitle, oldTitle = {}) {
+  if (newTitle === oldTitle) return
+  const titleDOM = document.getElementById('title')
+  titleDOM.innerHTML = newTitle.text
+  titleDOM.style.color = newTitle.color
+}
+
+function renderContent(newContent, oldContent = {}) {
+  if (newContent === oldContent) return
+  const contentDOM = document.getElementById('content')
+  contentDOM.innerHTML = newContent.text
+  contentDOM.style.color = newContent.color
+
+}
+
 const appState = {
   title: {
     text: 'React little book',
@@ -9,16 +41,6 @@ const appState = {
   }
 }
 
-function createStore(state, stateChanger) {
-  const listeners = []
-  const subscribe = (listener) => listeners.push(listener)
-  const getState = () => state
-  const dispatch = (action) => {
-    stateChanger(state, action)
-    listeners.forEach((listener) => listener())
-  }
-  return {getState, dispatch, subscribe}
-}
 
 function stateChanger(state, action) {
   switch (action.type) {
@@ -33,26 +55,14 @@ function stateChanger(state, action) {
   }
 }
 
-function renderApp(appState) {
-  renderTitle(appState.title)
-  renderContent(appState.content)
-}
-
-function renderTitle(title) {
-  const titleDOM = document.getElementById('title')
-  titleDOM.innerHTML = title.text
-  titleDOM.style.color = title.color
-}
-
-function renderContent(content) {
-  const contentDOM = document.getElementById('content')
-  contentDOM.innerHTML = content.text
-  contentDOM.style.color = content.color
-
-}
 
 const store = createStore(appState, stateChanger)
-store.subscribe(() => renderApp(store.getState()))
+let oldState = store.getState()
+store.subscribe(() => {
+  const newState = store.getState()
+  renderApp(newState, oldState)
+  oldState = newState
+})
 
 renderApp(store.getState())
 
